@@ -1,0 +1,84 @@
+// User class
+class User {
+    constructor(username, password, firstName, lastName) {
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+}
+
+// Login class
+class Login {
+    constructor() {
+        this.users = [];
+        this.currentUser = null;
+    }
+
+    checkUserName(username) {
+        return /^[a-zA-Z0-9]{1,4}_[a-zA-Z0-9]$/.test(username);
+    }
+
+    checkPasswordComplexity(password) {
+        return /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/.test(password);
+    }
+
+    registerUser(username, password, firstName, lastName) {
+        if (this.checkUserName(username) && this.checkPasswordComplexity(password)) {
+            const newUser = new User(username, password, firstName, lastName);
+            this.users.push(newUser);
+            return `User registered successfully: ${username}`;
+        } else {
+            return "Registration failed. Please check username and password requirements.";
+        }
+    }
+
+    loginUser(username, password) {
+        const user = this.users.find(u => u.username === username && u.password === password);
+        if (user) {
+            this.currentUser = user;
+            return true;
+        }
+        return false;
+    }
+
+    returnLoginStatus() {
+        return this.currentUser ? `Logged in as ${this.currentUser.username}` : "Not logged in";
+    }
+}
+
+// Example usage
+const loginSystem = new Login();
+
+// Registration
+console.log(loginSystem.registerUser("john_d", "P@ssw0rd", "John", "Doe"));
+console.log(loginSystem.registerUser("jane_", "WeakPass", "Jane", "Doe")); // Should fail
+
+// Login
+console.log(loginSystem.loginUser("john_d", "P@ssw0rd")); // Should return true
+console.log(loginSystem.returnLoginStatus());
+console.log(loginSystem.loginUser("jane_", "WeakPass")); // Should return false
+console.log(loginSystem.returnLoginStatus());
+
+// Unit tests
+function runTests() {
+    const testLogin = new Login();
+
+    // Test username formatting
+    console.assert(testLogin.checkUserName("user_"), "Username correctly formatted");
+    console.assert(!testLogin.checkUserName("toolong_"), "Username incorrectly formatted (too long)");
+    console.assert(!testLogin.checkUserName("nounder"), "Username does not contain an underscore");
+
+    // Test password complexity
+    console.assert(testLogin.checkPasswordComplexity("P@ssw0rd"), "Password meets complexity requirements");
+    console.assert(!testLogin.checkPasswordComplexity("weakpass"), "Password does not meet complexity requirements");
+
+    // Test registration and login
+    testLogin.registerUser("test_", "T3st@Pass", "Test", "User");
+    console.assert(testLogin.loginUser("test_", "T3st@Pass"), "Login successful");
+    console.assert(!testLogin.loginUser("test_", "WrongPass"), "Login failed");
+
+    console.log("All tests completed.");
+}
+
+runTests();
